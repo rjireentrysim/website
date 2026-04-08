@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reentry Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:   #0d0d0d;
+    --dark:    #1a1a1a;
+    --charcoal:#2e2e2e;
+    --rust:    #8B3A2A;
+    --terra:   #C2522A;
+    --sand:    #D4956A;
+    --warm:    #E8C49A;
+    --cream:   #F7F0E6;
+    --white:   #FDFCFA;
+    --plum:    #4A2D5A;
+    --violet:  #7B4F8E;
+    --lilac:   #C8A8D8;
+    --purple-glow: rgba(123,79,142,0.15);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Outfit', sans-serif; background: var(--white); color: var(--dark); overflow-x: hidden; }
+
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; padding: 1rem 3rem; display: flex; align-items: center; justify-content: space-between; transition: background 0.4s, padding 0.4s; }
+  nav.scrolled { background: rgba(13,13,13,0.95); backdrop-filter: blur(12px); padding: 0.75rem 3rem; }
+  .nav-logo { display: flex; flex-direction: column; align-items: flex-start; text-decoration: none; }
+  .nav-logo-circle { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--terra); display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+  nav.scrolled .nav-logo-circle { width: 32px; height: 32px; }
+  .nav-logo-abbr { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 700; color: var(--terra); }
+  nav.scrolled .nav-logo-abbr { font-size: 0.85rem; }
+  .nav-logo-name { font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-top: 3px; transition: all 0.3s; max-height: 20px; overflow: hidden; }
+  nav:not(.scrolled) .nav-logo-name { opacity: 0; }
+  nav.scrolled .nav-logo-name { opacity: 1; }
+  nav ul { list-style: none; display: flex; gap: 2.5rem; align-items: center; }
+  nav ul li a { text-decoration: none; color: rgba(255,255,255,0.75); font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; transition: color 0.2s; }
+  nav ul li a:hover { color: var(--lilac); }
+  .nav-cta { background: var(--terra); color: var(--white) !important; padding: 0.5rem 1.25rem; transition: background 0.2s !important; }
+  .nav-cta:hover { background: var(--rust) !important; }
+
+  /* HERO */
+  .hero { min-height: 100vh; background: linear-gradient(160deg, #0d0d0d 0%, #1a0d1f 25%, #1c0f0a 50%, #3a1a0d 75%, #6b2e18 100%); display: flex; align-items: center; position: relative; overflow: hidden; padding: 0 3rem; }
+  .hero::before { content: ''; position: absolute; top: -10%; left: -5%; width: 55vw; height: 55vw; background: radial-gradient(circle, rgba(74,45,90,0.35) 0%, rgba(123,79,142,0.12) 40%, transparent 70%); border-radius: 50%; pointer-events: none; }
+  .hero-warm-orb { position: absolute; top: -20%; right: -10%; width: 70vw; height: 70vw; background: radial-gradient(circle, rgba(194,82,42,0.18) 0%, rgba(139,58,42,0.08) 40%, transparent 70%); border-radius: 50%; pointer-events: none; }
+  .hero::after { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); opacity: 0.4; pointer-events: none; }
+  .hero-content { position: relative; z-index: 1; max-width: 780px; animation: fadeUp 1s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  .hero-org { font-size: 0.68rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--lilac); margin-bottom: 1.5rem; animation: fadeUp 1s 0.1s ease both; }
+  .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 600; line-height: 1.05; color: var(--white); margin-bottom: 1.5rem; animation: fadeUp 1s 0.2s ease both; }
+  .hero-title em { color: var(--sand); font-style: italic; }
+  .hero-sub { font-size: 1.05rem; line-height: 1.75; color: rgba(255,255,255,0.6); max-width: 560px; margin-bottom: 2.5rem; animation: fadeUp 1s 0.3s ease both; }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 1s 0.4s ease both; }
+  .btn-primary { background: var(--terra); color: var(--white); border: none; padding: 0.9rem 2rem; font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s, transform 0.2s; }
+  .btn-primary:hover { background: var(--rust); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--lilac); border: 1px solid rgba(200,168,216,0.35); padding: 0.9rem 2rem; font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; }
+  .btn-ghost:hover { border-color: var(--lilac); color: white; }
+  .hero-scroll { position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; color: rgba(255,255,255,0.3); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; z-index: 1; animation: bounce 2s infinite; }
+  .hero-scroll::after { content: ''; width: 1px; height: 40px; background: linear-gradient(to bottom, rgba(200,168,216,0.4), transparent); }
+  @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(6px); } }
+
+  /* WHAT SECTION */
+  .what-section { padding: 7rem 3rem; }
+  .what-label { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--terra); margin-bottom: 1rem; }
+  .what-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 600; line-height: 1.15; color: var(--dark); margin-bottom: 2rem; }
+
+  /* Side by side row */
+  .what-row { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+
+  .what-body { font-size: 0.95rem; line-height: 1.8; color: #555; margin-bottom: 1.25rem; }
+  .disclaimer-box { background: var(--cream); border-left: 3px solid var(--violet); padding: 1rem 1.25rem; font-size: 0.85rem; line-height: 1.7; color: #666; font-style: italic; margin-top: 1.5rem; }
+
+  /* Video thumbnail */
+  .video-thumb { position: relative; width: 100%; aspect-ratio: 16/9; cursor: pointer; overflow: hidden; background: #111; }
+  .video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
+  .video-thumb:hover img { transform: scale(1.02); }
+  .play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; background: rgba(194,82,42,0.92); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; transition: background 0.2s, transform 0.2s; pointer-events: none; }
+  .video-thumb:hover .play-btn { background: var(--terra); transform: translate(-50%, -50%) scale(1.08); }
+  .video-thumb iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  .video-caption { margin-top: 0.85rem; font-size: 0.78rem; color: #999; line-height: 1.5; font-style: italic; }
+
+  .pic-placeholder { background: linear-gradient(135deg, #1a0f0a, #2a1a2e 40%, #4a2010 70%, #8B3A2A); aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .pic-placeholder::after { content: 'Image'; font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+
+  /* FLIP CARDS */
+  .flip-section { padding: 5rem 3rem; background: var(--cream); }
+  .flip-section-header { text-align: center; margin-bottom: 3.5rem; }
+  .section-label { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--terra); margin-bottom: 0.75rem; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 600; color: var(--dark); }
+  .flip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+  .flip-card { height: 260px; perspective: 1000px; cursor: pointer; }
+  .flip-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+  .flip-card:hover .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back { position: absolute; inset: 0; backface-visibility: hidden; }
+  .flip-front { background: linear-gradient(160deg, #1a1a1a, #1a0d1f 40%, #3a1a0d); display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; padding: 1.5rem; }
+  .flip-front-pic { position: absolute; inset: 0; opacity: 0.65; }
+  .flip-front-content { position: relative; z-index: 1; }
+  .flip-tag { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--lilac); margin-bottom: 0.4rem; }
+  .flip-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: white; line-height: 1.2; }
+  .flip-back { transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; padding: 1.5rem; }
+  .flip-back.terra { background: var(--terra); }
+  .flip-back.plum  { background: var(--plum); }
+  .flip-back-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600; color: white; margin-bottom: 0.75rem; }
+  .flip-back-body { font-size: 0.82rem; line-height: 1.7; color: rgba(255,255,255,0.85); }
+
+  /* GALLERY */
+  .gallery-section { padding: 5rem 3rem; overflow: hidden; }
+  .gallery-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; }
+  .gallery-track-wrap { overflow: hidden; position: relative; }
+  .gallery-track { display: flex; gap: 1.5rem; transition: transform 0.4s ease; }
+  .gallery-item { min-width: 280px; max-width: 280px; flex-shrink: 0; cursor: pointer; position: relative; overflow: hidden; }
+  .gallery-item img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.4s; }
+  .gallery-item:hover img { transform: scale(1.03); }
+  .gallery-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 1rem 0.75rem; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); transform: translateY(100%); transition: transform 0.3s ease; color: white; font-size: 0.82rem; }
+  .gallery-item:hover .gallery-caption { transform: translateY(0); }
+  .gallery-controls { display: flex; gap: 0.5rem; }
+  .gallery-btn { width: 36px; height: 36px; border: 1px solid rgba(123,79,142,0.3); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--violet); font-size: 1rem; transition: all 0.2s; }
+  .gallery-btn:hover { background: var(--plum); color: white; border-color: var(--plum); }
+
+  /* BOTTOM */
+  .bottom-section { padding: 6rem 3rem; background: linear-gradient(160deg, #0d0d0d 0%, #1a0d1f 30%, #1c0f0a 60%, #2a1208 100%); }
+  .message-label { font-size: 0.62rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--lilac); margin-bottom: 1rem; }
+  .message-text { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 400; font-style: italic; color: var(--warm); line-height: 1.5; margin-bottom: 1.5rem; }
+  .message-body { font-size: 0.88rem; line-height: 1.75; color: rgba(255,255,255,0.5); margin-bottom: 1.5rem; }
+
+  /* FOOTER */
+  footer { background: #0d0d0d; padding: 3rem 3rem 1.5rem; border-top: 1px solid rgba(123,79,142,0.2); }
+  .footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 3rem; padding-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .footer-logo-name { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: white; margin-bottom: 0.5rem; }
+  .footer-tagline { font-size: 0.82rem; color: rgba(255,255,255,0.35); line-height: 1.6; }
+  .footer-col-title { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--lilac); margin-bottom: 1rem; }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 0.5rem; }
+  .footer-col ul li a { color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
+  .footer-col ul li a:hover { color: var(--lilac); }
+  .footer-bottom { padding-top: 1.5rem; display: flex; justify-content: space-between; font-size: 0.7rem; color: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-circle"><span class="nav-logo-abbr">RJI</span></div>
+    <span class="nav-logo-name">Restorative Justice Initiative</span>
+  </a>
+  <ul>
+    <li><a href="#what">About</a></li>
+    <li><a href="#explore">Explore</a></li>
+    <li><a href="get-started.html" class="nav-cta">Get Started</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-warm-orb"></div>
+  <div class="hero-content">
+    <div class="hero-org">Restorative Justice Initiative</div>
+    <h1 class="hero-title">Building understanding,<br><em>changing culture.</em></h1>
+    <p class="hero-sub">People coming home from prison face countless barriers to success, often without the understanding of their friends and neighbors. Here, you'll find everything you need to facilitate your own reentry simulation and lead your community to improve understanding, break down barriers, and strengthen reentry pathways.</p>
+    <div class="hero-actions">
+      <a href="get-started.html" class="btn-primary">Get Started →</a>
+      <a href="#what" class="btn-ghost">What is a reentry simulation?</a>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- WHAT IS A REENTRY SIMULATION -->
+<section class="what-section" id="what">
+  <div class="what-label">Overview</div>
+  <h2 class="what-title">What is a reentry simulation?</h2>
+
+  <div class="what-row">
+    <!-- LEFT: text + disclaimer -->
+    <div>
+      <p class="what-body">A reentry simulation is a 1.5–2 hour experience where participants are given the identity of a fictional person returning home from prison. The profiles represent different challenges across gender, childcare, ageing, digital literacy, domestic violence, higher education, and more.</p>
+      <p class="what-body">They navigate simulated barriers like housing, transportation, childcare, and more, noticing along the way their own feelings of frustration, anger, solidarity, and occasional joy. Facilitators lead debrief sessions throughout.</p>
+      <p class="what-body">Take a look at an example of a simulation by the Penn State team:</p>
+      <div class="disclaimer-box">
+        We don't believe that a simulation can — or should — capture the full, complex experience of returning home from prison. It is not a way to "walk in someone's shoes," but it is a way to illustrate systemic barriers.
+      </div>
+    </div>
+
+    <!-- RIGHT: video -->
+    <div>
+      <div class="video-thumb" onclick="loadVideo(this)" data-id="pKHYXawKUKw">
+        <img src="https://img.youtube.com/vi/pKHYXawKUKw/maxresdefault.jpg" alt="Reentry Simulation Video" />
+        <div class="play-btn">▶</div>
+      </div>
+      <div class="video-caption">Penn State Reentry Simulation — click to watch</div>
+    </div>
+  </div>
+</section>
+
+<!-- FLIP CARDS -->
+<section class="flip-section" id="explore">
+  <div class="flip-section-header">
+    <div class="section-label">Explore</div>
+    <h2 class="section-title">What you'll find here</h2>
+  </div>
+  <div class="flip-grid">
+
+    <div class="flip-card">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-front-pic" style="background:linear-gradient(160deg,#1a0d1f,#2a1a2e,#3a1a0d);"></div>
+          <div class="flip-front-content">
+            <div class="flip-tag">Planning Guide</div>
+            <div class="flip-title">How to run a simulation</div>
+          </div>
+        </div>
+        <div class="flip-back terra">
+          <div class="flip-back-title">Step-by-step planning</div>
+          <div class="flip-back-body">From deciding who to invite 6–8 months out to training volunteers the morning of — everything you need to run it well, for free.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-front-pic" style="background:linear-gradient(160deg,#1a0d05,#2a1a2e,#5a2510);"></div>
+          <div class="flip-front-content">
+            <div class="flip-tag">Materials</div>
+            <div class="flip-title">Printable materials &amp; profiles</div>
+          </div>
+        </div>
+        <div class="flip-back plum">
+          <div class="flip-back-title">Ready to download</div>
+          <div class="flip-back-body">Participant profiles, money, transportation tickets, station instructions — all the materials you need, free to use.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-front-pic" style="background:linear-gradient(160deg,#1a0d1f,#150d08,#4a2515);"></div>
+          <div class="flip-front-content">
+            <div class="flip-tag">Profiles</div>
+            <div class="flip-title">Identity &amp; add-on profiles</div>
+          </div>
+        </div>
+        <div class="flip-back terra">
+          <div class="flip-back-title">Representing real challenges</div>
+          <div class="flip-back-body">Add-on profiles cover gender, childcare, ageing, digital literacy, domestic violence, and higher education — select 1–2 based on your community's needs.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card">
+      <div class="flip-inner">
+        <div class="flip-front">
+          <div class="flip-front-pic" style="background:linear-gradient(160deg,#1a1008,#2a1a2e,#6b3a18);"></div>
+          <div class="flip-front-content">
+            <div class="flip-tag">Community</div>
+            <div class="flip-title">Who runs these simulations</div>
+          </div>
+        </div>
+        <div class="flip-back plum">
+          <div class="flip-back-title">A powerful community tool</div>
+          <div class="flip-back-body">Groups use what they learn to plan actionable steps to dismantle barriers to transportation, employment, childcare, and more.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery-section" id="gallery">
+  <div class="gallery-header">
+    <div>
+      <div class="section-label">Recent Events</div>
+      <h2 class="section-title" style="font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:600;">Simulations in the community</h2>
+    </div>
+    <div class="gallery-controls">
+      <button class="gallery-btn" onclick="slideGallery(-1)">←</button>
+      <button class="gallery-btn" onclick="slideGallery(1)">→</button>
+    </div>
+  </div>
+  <div class="gallery-track-wrap">
+    <div class="gallery-track" id="galleryTrack">
+
+      <div class="gallery-item">
+        <img src="501A2134.jpg" alt="Chance Booth" />
+        <div class="gallery-caption">Chance Booth</div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="501A2599.jpg" alt="Reentry Simulation" />
+        <div class="gallery-caption">Reentry Simulation</div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="501A2873.jpg" alt="RJI@SupremeCourt" />
+        <div class="gallery-caption">RJI@SupremeCourt</div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="IMG_0711.jpg" alt="Reentry Simulation" />
+        <div class="gallery-caption">Reentry Simulation</div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="IMG_0736.jpg" alt="Reentry Simulation" />
+        <div class="gallery-caption">Reentry Simulation</div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="Screenshot 2026-04-07 235356.png" alt="Reentry Simulation" />
+        <div class="gallery-caption">Reentry Simulation</div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="Screenshot-2026-02-10-110010.png" alt="Reentry Simulation" />
+        <div class="gallery-caption">Reentry Simulation</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM: MESSAGE -->
+<section class="bottom-section">
+  <div class="message-label">About This Resource</div>
+  <div class="message-text">"A Reentry Simulation can be a powerful tool to bring communities together."</div>
+  <p class="message-body">We've seen groups use what they learned to plan actionable steps to dismantle barriers to transportation, employment, childcare, and more. Planning and facilitating a simulation can be a heavy lift — we've put together these resources to make it as light as possible.</p>
+  <a href="get-started.html" class="btn-primary" style="display:inline-block; margin-top:0.5rem;">Get the planning guide →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo-name">Restorative Justice Initiative</div>
+      <div class="footer-tagline">Helping communities understand reentry through immersive simulation. Based at Penn State University.</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Navigate</div>
+      <ul>
+        <li><a href="#what">What is a reentry simulation?</a></li>
+        <li><a href="#explore">Explore</a></li>
+        <li><a href="get-started.html">Get Started</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Resources</div>
+      <ul>
+        <li><a href="#">Access Materials</a></li>
+        <li><a href="https://psu.mediaspace.kaltura.com/media/Reentry+Simulation/1_iai8lx1a" target="_blank">Training Video</a></li>
+        <li><a href="https://drive.google.com/file/d/1GmEW8Lrbygei7Nq7RaFiFQy-Mm82C6FU/view" target="_blank">Floor Plan</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Restorative Justice Initiative</span>
+    <span>Penn State University</span>
+  </div>
+</footer>
+
+<script>
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 80); });
+
+  function loadVideo(el) {
+    const id = el.getAttribute('data-id');
+    el.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
+  }
+
+  let currentIndex = 0;
+  function slideGallery(dir) {
+    const track = document.getElementById('galleryTrack');
+    const items = track.querySelectorAll('.gallery-item');
+    const total = items.length;
+    const itemWidth = items[0].offsetWidth + 24;
+    currentIndex = (currentIndex + dir + total) % total;
+    track.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+  }
+</script>
+</body>
+</html>

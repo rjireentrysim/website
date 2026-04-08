@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Started — Reentry Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:#0d0d0d; --dark:#1a1a1a; --rust:#8B3A2A; --terra:#C2522A;
+    --sand:#D4956A; --warm:#E8C49A; --cream:#F7F0E6; --white:#FDFCFA; --muted:#6b5a4e;
+    --plum:#4A2D5A; --violet:#7B4F8E; --lilac:#C8A8D8;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--dark);overflow-x:hidden;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(13,13,13,0.96);backdrop-filter:blur(12px);padding:0.85rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(123,79,142,0.2);}
+  .nav-logo{display:flex;align-items:center;gap:0.75rem;text-decoration:none;}
+  .nav-logo-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--terra);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .nav-logo-abbr{font-family:'Cormorant Garamond',serif;font-size:0.85rem;font-weight:700;color:var(--terra);}
+  .nav-logo-name{font-size:0.7rem;letter-spacing:0.08em;color:rgba(255,255,255,0.45);}
+  nav ul{list-style:none;display:flex;gap:2rem;align-items:center;}
+  nav ul li a{text-decoration:none;color:rgba(255,255,255,0.6);font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s;}
+  nav ul li a:hover{color:var(--lilac);}
+  .nav-back{color:var(--lilac)!important;border-left:1px solid rgba(200,168,216,0.25);padding-left:1rem!important;}
+  .nav-cta{background:var(--terra);color:var(--white)!important;padding:0.45rem 1.1rem;}
+  .hero{padding:8rem 3rem 5rem;background:linear-gradient(160deg,#0d0d0d 0%,#1a0d1f 25%,#1c0f0a 55%,#3a1a0d 100%);position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-20%;left:-5%;width:50vw;height:50vw;border-radius:50%;background:radial-gradient(circle,rgba(74,45,90,0.3) 0%,transparent 65%);pointer-events:none;}
+  .hero::after{content:'';position:absolute;bottom:-20%;right:-5%;width:55vw;height:55vw;border-radius:50%;background:radial-gradient(circle,rgba(194,82,42,0.12) 0%,transparent 65%);pointer-events:none;}
+  .hero-inner{position:relative;z-index:1;max-width:780px;}
+  .hero-crumb{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:1.25rem;}
+  .hero-crumb a{color:var(--lilac);text-decoration:none;}
+  .hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:600;color:var(--white);line-height:1.1;margin-bottom:1rem;}
+  .hero-sub{font-size:1rem;line-height:1.75;color:rgba(255,255,255,0.55);max-width:680px;}
+  .phase-nav{position:sticky;top:62px;z-index:100;background:rgba(247,240,230,0.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(139,58,42,0.12);padding:0 3rem;display:flex;align-items:stretch;overflow-x:auto;}
+  .phase-tab{padding:1rem 1.5rem;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;font-weight:500;background:none;border-top:none;border-left:none;border-right:none;font-family:'Outfit',sans-serif;}
+  .phase-tab:hover{color:var(--violet);}
+  .phase-tab.active{color:var(--violet);border-bottom-color:var(--violet);}
+  .phase-divider{width:1px;background:rgba(139,58,42,0.12);margin:0.75rem 0;}
+  .progress-wrap{background:var(--dark);padding:0.9rem 3rem;display:flex;align-items:center;gap:1.5rem;}
+  .progress-label{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--lilac);white-space:nowrap;}
+  .progress-track{flex:1;height:3px;background:rgba(255,255,255,0.08);}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--plum),var(--violet),var(--sand));width:0%;transition:width 0.4s ease;}
+  .progress-count{font-size:0.72rem;color:rgba(255,255,255,0.4);white-space:nowrap;}
+  .guide-layout{display:grid;grid-template-columns:240px 1fr;max-width:1280px;margin:0 auto;padding:3rem 3rem 0;gap:0;align-items:start;}
+  .guide-sidebar{position:sticky;top:130px;padding-right:2.5rem;border-right:1px solid rgba(123,79,142,0.12);}
+  .sidebar-phase-title{font-size:0.6rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--violet);margin-bottom:1rem;}
+  .sidebar-links{list-style:none;}
+  .sidebar-links li{margin-bottom:0.1rem;}
+  .sidebar-links a{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.6rem;text-decoration:none;font-size:0.8rem;color:var(--muted);border-left:2px solid transparent;transition:all 0.2s;}
+  .sidebar-links a:hover{color:var(--violet);border-left-color:var(--lilac);}
+  .sidebar-links a.active{color:var(--violet);border-left-color:var(--violet);background:rgba(123,79,142,0.05);font-weight:500;}
+  .sidebar-time{font-size:0.58rem;letter-spacing:0.1em;color:var(--lilac);background:rgba(200,168,216,0.12);padding:0.1rem 0.4rem;white-space:nowrap;}
+  .sidebar-div{height:1px;background:rgba(123,79,142,0.08);margin:0.65rem 0;}
+  .sidebar-downloads{margin-top:2rem;padding:1rem;background:var(--dark);border:1px solid rgba(123,79,142,0.2);}
+  .dl-title{font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--lilac);margin-bottom:0.6rem;}
+  .dl-link{display:flex;align-items:center;gap:0.45rem;text-decoration:none;color:rgba(255,255,255,0.45);font-size:0.77rem;padding:0.35rem 0;border-bottom:1px solid rgba(255,255,255,0.05);transition:color 0.2s;}
+  .dl-link:hover{color:var(--lilac);}
+  .dl-link:last-child{border-bottom:none;}
+  .guide-main{padding-left:3rem;padding-bottom:5rem;}
+  .step-block{padding:2.5rem 0;border-bottom:1px solid rgba(139,58,42,0.07);scroll-margin-top:140px;}
+  .step-header{display:flex;align-items:flex-start;gap:1.5rem;cursor:pointer;user-select:none;}
+  .step-num{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:600;color:rgba(123,79,142,0.1);line-height:1;flex-shrink:0;min-width:60px;transition:color 0.2s;}
+  .step-block.open .step-num{color:rgba(123,79,142,0.22);}
+  .step-header-text{flex:1;}
+  .step-when{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--terra);margin-bottom:0.4rem;}
+  .step-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--dark);line-height:1.2;}
+  .step-toggle{width:28px;height:28px;border:1px solid rgba(123,79,142,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--violet);font-size:1rem;flex-shrink:0;margin-top:0.25rem;transition:all 0.2s;}
+  .step-block.open .step-toggle{background:var(--violet);color:white;transform:rotate(45deg);}
+  .step-body{max-height:0;overflow:hidden;transition:max-height 0.5s ease,opacity 0.3s ease;opacity:0;padding-left:75px;}
+  .step-block.open .step-body{max-height:1400px;opacity:1;}
+  .step-body-inner{padding-top:1.25rem;}
+  .step-text{font-size:0.92rem;line-height:1.8;color:#555;margin-bottom:0.75rem;}
+  .step-text strong{color:var(--dark);font-weight:600;}
+  .step-text em{font-style:italic;}
+  .step-text a{color:var(--violet);}
+  .step-list{list-style:none;margin:0.5rem 0;}
+  .step-list li{padding:0.4rem 0 0.4rem 1.25rem;position:relative;font-size:0.9rem;line-height:1.65;color:#555;border-bottom:1px solid rgba(139,58,42,0.05);}
+  .step-list li:last-child{border-bottom:none;}
+  .step-list li::before{content:'—';position:absolute;left:0;color:var(--sand);}
+  .step-ol{list-style:none;margin:0.5rem 0;counter-reset:sc;}
+  .step-ol li{padding:0.45rem 0 0.45rem 1.9rem;position:relative;counter-increment:sc;font-size:0.9rem;line-height:1.65;color:#555;border-bottom:1px solid rgba(139,58,42,0.05);}
+  .step-ol li:last-child{border-bottom:none;}
+  .step-ol li::before{content:counter(sc,decimal-leading-zero);position:absolute;left:0;font-family:'Cormorant Garamond',serif;font-size:0.75rem;color:var(--violet);font-weight:700;top:0.5rem;}
+  .pro-tip{background:rgba(200,168,216,0.08);border-left:3px solid var(--violet);padding:0.85rem 1.1rem;margin:1rem 0;font-size:0.85rem;line-height:1.65;color:var(--dark);display:flex;gap:0.5rem;}
+  .pro-tip::before{content:'💡';flex-shrink:0;}
+  .example-box{background:#fffdf9;border:1px solid rgba(139,58,42,0.15);padding:1.5rem;margin:1.25rem 0;position:relative;font-size:0.87rem;line-height:1.8;color:var(--dark);}
+  .example-badge{position:absolute;top:-1px;right:1rem;background:var(--plum);color:white;font-size:0.58rem;letter-spacing:0.2em;padding:0.15rem 0.55rem;}
+  .example-box p{margin-bottom:0.6rem;}
+  .example-box p:last-child{margin-bottom:0;}
+  .example-box strong{color:var(--dark);}
+  .example-box em{font-style:italic;color:#777;}
+  .example-box a{color:var(--violet);}
+  .example-box .ex-rule{border:none;border-top:1px solid rgba(139,58,42,0.12);margin:0.75rem 0;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem;}
+  .col-title{font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.5rem;font-weight:600;}
+  .col-title.do{color:#2e7d32;}
+  .col-title.dont{color:var(--rust);}
+  .ck-list{list-style:none;}
+  .ck-list li{display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0;font-size:0.88rem;color:#555;border-bottom:1px solid rgba(139,58,42,0.05);}
+  .ck-list li:last-child{border-bottom:none;}
+  .ck-box{width:16px;height:16px;border:1.5px solid rgba(123,79,142,0.3);flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+  .ck-box.on{background:var(--violet);border-color:var(--violet);}
+  .ck-box.on::after{content:'✓';font-size:0.6rem;color:white;}
+  .ck-lbl.done{text-decoration:line-through;color:#aaa;}
+  .note-box{background:rgba(200,168,216,0.08);border-left:3px solid rgba(123,79,142,0.3);padding:0.85rem 1.1rem;margin:1rem 0;font-size:0.83rem;line-height:1.7;color:#666;font-style:italic;}
+  .phase-photo{height:260px;overflow:hidden;position:relative;margin:0 -3rem;}
+  .phase-photo-inner{height:100%;background:linear-gradient(135deg,#0d0d0d,#1a0d1f 35%,#3a1a0d 65%,#8B3A2A);display:flex;align-items:flex-end;padding:2rem 3rem;}
+  .phase-photo-text{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;font-style:italic;color:rgba(200,168,216,0.8);max-width:600px;}
+  .downloads-section{padding:4rem 3rem;background:var(--dark);}
+  .downloads-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:2rem;}
+  .download-card{background:rgba(255,255,255,0.03);border:1px solid rgba(123,79,142,0.15);padding:1.5rem;text-decoration:none;transition:all 0.2s;display:block;}
+  .download-card:hover{background:rgba(123,79,142,0.1);border-color:var(--violet);transform:translateY(-2px);}
+  .download-card-icon{font-size:1.5rem;margin-bottom:0.75rem;}
+  .download-card-title{font-size:0.9rem;font-weight:600;color:white;margin-bottom:0.4rem;}
+  .download-card-desc{font-size:0.78rem;color:rgba(255,255,255,0.4);line-height:1.5;}
+  .cta-section{background:linear-gradient(135deg,var(--plum),var(--violet) 35%,var(--terra) 65%,var(--rust));padding:5rem 3rem;text-align:center;position:relative;overflow:hidden;}
+  .cta-title{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;color:white;margin-bottom:0.75rem;position:relative;z-index:1;}
+  .cta-sub{font-size:1rem;color:rgba(255,255,255,0.65);margin-bottom:2.5rem;position:relative;z-index:1;}
+  .btn-white{display:inline-block;background:white;color:var(--plum);padding:0.9rem 2.5rem;font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;transition:all 0.2s;position:relative;z-index:1;}
+  .btn-white:hover{background:var(--cream);transform:translateY(-1px);}
+  .btn-action{display:inline-flex;align-items:center;gap:0.5rem;background:var(--terra);color:white;padding:0.65rem 1.2rem;text-decoration:none;font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'Outfit',sans-serif;font-weight:500;transition:background 0.2s;}
+  .btn-action:hover{background:var(--rust);}
+  .btn-action-ghost{display:inline-flex;align-items:center;gap:0.5rem;border:1px solid rgba(123,79,142,0.35);color:var(--violet);padding:0.65rem 1.2rem;text-decoration:none;font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'Outfit',sans-serif;font-weight:500;transition:all 0.2s;}
+  .btn-action-ghost:hover{border-color:var(--violet);background:rgba(123,79,142,0.06);}
+  footer{background:#0d0d0d;padding:2rem 3rem;border-top:1px solid rgba(123,79,142,0.15);display:flex;justify-content:space-between;align-items:center;}
+  .footer-right{font-size:0.7rem;color:rgba(255,255,255,0.2);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-circle"><span class="nav-logo-abbr">RJI</span></div>
+    <span class="nav-logo-name">Restorative Justice Initiative</span>
+  </a>
+  <ul>
+    <li><a href="index.html" class="nav-back">← Home</a></li>
+    <li><a href="#step1">Planning</a></li>
+    <li><a href="#step7">Materials</a></li>
+    <li><a href="#step12">Day Of</a></li>
+    <li><a href="#downloads" class="nav-cta">Access Materials</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-crumb"><a href="index.html">Home</a> › Get Started</div>
+    <h1 class="hero-title">Get Started</h1>
+    <p class="hero-sub">A Reentry Simulation can be a powerful tool to bring communities together to support their formerly-incarcerated neighbors. We've seen groups use what they learned to plan actionable steps to dismantle barriers to transportation, employment, childcare, and more. Planning and facilitating a simulation can be a heavy lift — we've put together these resources to make it as light as possible.</p>
+  </div>
+</section>
+
+<div class="phase-nav">
+  <button class="phase-tab active" onclick="setPhase(this)">Early Planning</button>
+  <div class="phase-divider"></div>
+  <button class="phase-tab" onclick="setPhase(this)">Promotion</button>
+  <div class="phase-divider"></div>
+  <button class="phase-tab" onclick="setPhase(this)">Materials &amp; Volunteers</button>
+  <div class="phase-divider"></div>
+  <button class="phase-tab" onclick="setPhase(this)">Day Of</button>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-label">Checklist</div>
+  <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+  <div class="progress-count" id="pCount">0 of 8 checked</div>
+</div>
+
+<div class="guide-layout">
+  <aside class="guide-sidebar">
+    <div class="sidebar-phase-title">What to know when you're…</div>
+    <ul class="sidebar-links">
+      <li><a href="#step1" class="active">Deciding who to invite <span class="sidebar-time">6–8 mo</span></a></li>
+      <li><a href="#step2">Finding partners <span class="sidebar-time">6 mo</span></a></li>
+      <li><a href="#step3">Planning logistics <span class="sidebar-time">4 mo</span></a></li>
+      <div class="sidebar-div"></div>
+      <li><a href="#step4">Save the Date <span class="sidebar-time">3 mo</span></a></li>
+      <li><a href="#step5">Designing flyers <span class="sidebar-time">2–3 mo</span></a></li>
+      <li><a href="#step6">Marketing <span class="sidebar-time">2 mo</span></a></li>
+      <div class="sidebar-div"></div>
+      <li><a href="#step7">Preparing materials <span class="sidebar-time">6 wk</span></a></li>
+      <li><a href="#step8">Selecting add-ons <span class="sidebar-time">5 wk</span></a></li>
+      <li><a href="#step9">Recruiting volunteers <span class="sidebar-time">1 mo</span></a></li>
+      <li><a href="#step10">Organizing materials <span class="sidebar-time">3 wk</span></a></li>
+      <li><a href="#step11">Sending reminders <span class="sidebar-time">1–2 wk</span></a></li>
+      <div class="sidebar-div"></div>
+      <li><a href="#step12">Setting up the room <span class="sidebar-time">Day of</span></a></li>
+      <li><a href="#step13">Training volunteers <span class="sidebar-time">Day of</span></a></li>
+    </ul>
+    <div class="sidebar-downloads">
+      <div class="dl-title">Downloads</div>
+      <a href="https://drive.google.com/file/d/1GmEW8Lrbygei7Nq7RaFiFQy-Mm82C6FU/view" class="dl-link" target="_blank">📐 Floor Plan</a>
+      <a href="https://docs.google.com/spreadsheets/d/1ncc9-KBCM9RIEbsCvFupOQpjpynle2sAAMNb5lKQvXQ/" class="dl-link" target="_blank">📋 Volunteer Tracker</a>
+      <a href="https://psu.mediaspace.kaltura.com/media/Reentry+Simulation/1_iai8lx1a" class="dl-link" target="_blank">🎥 Training Video</a>
+      <a href="#downloads" class="dl-link">📁 All Materials</a>
+    </div>
+  </aside>
+
+  <main class="guide-main">
+
+    <div class="step-block open" id="step1">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">01</div>
+        <div class="step-header-text">
+          <div class="step-when">6–8 Months Before Your Event</div>
+          <div class="step-title">Deciding who should attend</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">6–8 months out from your event, conceptualize its purpose. Consider who in your community has the power to make change. Think about inviting:</p>
+        <div class="two-col">
+          <div>
+            <div class="col-title do">People who interface with people who are reentering</div>
+            <ul class="step-list">
+              <li>Social workers</li><li>Treatment providers</li><li>Law enforcement</li>
+              <li>University administration</li><li>Judges &amp; lawyers</li>
+            </ul>
+          </div>
+          <div>
+            <div class="col-title dont">People whose decisions make an impact</div>
+            <ul class="step-list">
+              <li>County government</li><li>Transportation administrators</li>
+              <li>Representatives</li><li>Housing boards</li>
+            </ul>
+          </div>
+        </div>
+        <p class="step-text" style="margin-top:1rem;">We highly recommend inviting justice-impacted members of your community to participate from behind the tables rather than in the role of reentrants (see "Recruiting Volunteers").</p>
+        <div class="pro-tip">Some audiences may already recognize that there's a problem with our system, but others may not. It's best to have a balance of both.</div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step2">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">02</div>
+        <div class="step-header-text">
+          <div class="step-when">6 Months Before Your Event</div>
+          <div class="step-title">Finding partnerships</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">Think strategically. If possible, try to match the mission of your chosen partners to the values of your target audience. 6 months from your event, reach out to local groups involved with reentry, higher education in prison, housing advocacy, justice reform, or professional development for social workers. While they likely can't be financial supporters, you may also find help from churches, community centers, shelters, or food banks.</p>
+        <p class="step-text">Reentry Simulations can be run for free, but partners can help provide:</p>
+        <ul class="step-ol">
+          <li>A large space to host</li><li>Volunteers</li><li>Marketing / visibility</li>
+          <li>Printed materials</li><li>Facilitators</li>
+          <li>Panelists <em>(optional)</em></li><li>Food for participants <em>(optional)</em></li>
+        </ul>
+        <p class="step-text" style="margin-top:1rem;">When you contact partners, it's important to:</p>
+        <ul class="step-ol">
+          <li>Explain what a reentry simulation is and why it's important</li>
+          <li>Explain what role you'd like them to play and why</li>
+          <li>Be upfront with your needs (see list above)</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step3">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">03</div>
+        <div class="step-header-text">
+          <div class="step-when">4 Months Before Your Event</div>
+          <div class="step-title">Planning the logistics</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text"><strong>Length:</strong> We recommend booking a space for 3–4 hours. The components are:</p>
+        <ul class="step-ol">
+          <li>30 minutes for set up</li>
+          <li>30 minutes for volunteer training <em>(can be done on Zoom prior)</em></li>
+          <li>90–120 minutes for the simulation</li>
+          <li>1 hour for a panel or community planning session <em>(optional)</em></li>
+        </ul>
+        <p class="step-text" style="margin-top:1rem;"><strong>Date and time:</strong> Weekend mornings or afternoons work best. Weekdays may work if you have a guaranteed group of participants who are available (e.g. students in a class, teachers doing professional development). Weeknights are challenging.</p>
+        <p class="step-text"><strong>Space:</strong> Find a large open space you can book like a school gym, community center, or college campus recreational space. Partners may be able to help. See "Setting up the room" for the recommended floor plan. You should have 7–12 folding tables set up as stations around the perimeter.</p>
+        <div class="pro-tip">Avoid auditoriums with immovable seats.</div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step4">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">04</div>
+        <div class="step-header-text">
+          <div class="step-when">3 Months Before Your Event</div>
+          <div class="step-title">Save the Date</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">3 months from your event, send out a Save the Date. An email with the <strong>event name, time, date, location, and RSVP Google Form</strong> does the trick. Ask partners to forward this to organizations, listservs, and anyone else who might be interested.</p>
+        <div class="pro-tip">Use the Google Form to ask people if they're interested in volunteering. Explain that it will only take an extra 30 minutes of training.</div>
+        <div class="example-box">
+          <div class="example-badge">EXAMPLE SAVE THE DATE</div>
+          <p><strong>SAVE THE DATE:</strong></p>
+          <p><strong>Reentry Simulation</strong></p>
+          <p><a href="#">RSVP here</a></p>
+          <hr class="ex-rule">
+          <p>Come navigate systemic obstacles encountered by justice impacted individuals returning home such as employment, housing, and education. Facilitators will then lead discussions about the experience and how to make actionable change.</p>
+          <p><em>Event is open to community members and organizations*, and food will be provided!</em></p>
+          <p><strong>[Date and time]</strong><br><em>[ADDRESS]</em></p>
+          <p><a href="#">Click here to RSVP.</a></p>
+          <p>This interactive session is organized by [CO-SPONSORS]</p>
+          <hr class="ex-rule">
+          <p style="font-size:0.82rem;color:#777;">*NOTE: If you have lived experience of incarceration and reentry, you may want to join as a volunteer rather than as a participant. The experience of the simulation is geared toward people who are just learning about the system, and your expertise will be particularly valuable on the other side of the table. You will also have the opportunity to join the volunteers the day of and will not be asked to disclose any information.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step5">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">05</div>
+        <div class="step-header-text">
+          <div class="step-when">2–3 Months Before Your Event</div>
+          <div class="step-title">Designing flyers</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <div class="two-col">
+          <div>
+            <div class="col-title do">✓ Do</div>
+            <ul class="step-list">
+              <li>Include the event title, date, place, and RSVP method prominently</li>
+              <li>Include accessibility info, contact information, and co-sponsor logos</li>
+              <li>Include a way to sign up to volunteer</li>
+            </ul>
+          </div>
+          <div>
+            <div class="col-title dont">✗ Don't</div>
+            <ul class="step-list">
+              <li>Use language like "take a walk in their shoes" — we're simulating a system, not a person's full lived experience</li>
+              <li>Use images of one person alone — we don't want to suggest that any one person can represent reentry</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pro-tip">Try imagery that symbolizes systemic barriers like a maze, a long line, or a stack of paperwork.</div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step6">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">06</div>
+        <div class="step-header-text">
+          <div class="step-when">2 Months Before Your Event</div>
+          <div class="step-title">Marketing the simulation</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">2 months from your event, circulate your flyer. Remember to use a form for RSVPs and volunteer interest. Even if they're not official partners, ask community organizations, professional groups, and educational organizations to circulate your flyer.</p>
+        <div class="pro-tip">Try reaching out to elected officials and county governments. Even if they can't come, many will send a staff member.</div>
+      </div></div>
+    </div>
+
+    <div class="phase-photo">
+      <div class="phase-photo-inner">
+        <div class="phase-photo-text">"Cutting out and organizing materials can be much more time-consuming than you might expect. Rally help and leave yourself time."</div>
+      </div>
+    </div>
+
+    <div class="step-block" id="step7">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">07</div>
+        <div class="step-header-text">
+          <div class="step-when">6 Weeks Before Your Event</div>
+          <div class="step-title">Preparing materials</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">6 weeks from your event, prepare your physical materials. You'll need:</p>
+        <ul class="ck-list" id="ckList">
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Hanging name tags (1 per participant plus a few extra)*</span></li>
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Clear binder sleeves (1 per participant plus 1 per station)*</span></li>
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Pens (2 per station)</span></li>
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Sticky note pad (1 per station)</span></li>
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Manila envelopes (1 per station)</span></li>
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Clipboards (1 per facilitator)</span></li>
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Painters tape, rubber bands, scissors, binder clips, and other office supplies</span></li>
+          <li><div class="ck-box" onclick="ck(this)"></div><span class="ck-lbl">Printouts: instructions, profiles, money, transportation tickets, etc. — all files are under the "Access Materials" tab</span></li>
+        </ul>
+        <div class="note-box" style="margin-top:1rem;">*RJI may be able to provide pre-made boxes with these items. Please reach out at the contact link below if you're interested!</div>
+        <div class="pro-tip">Cutting out and organizing materials can be MUCH more time-consuming than you might expect. Rally help and leave yourself time!</div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step8">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">08</div>
+        <div class="step-header-text">
+          <div class="step-when">5 Weeks Before Your Event</div>
+          <div class="step-title">Selecting an add-on</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">5 weeks from your event, select 1–2 add-on profiles based on your audience.</p>
+        <p class="step-text">Because identity is key to how people experience incarceration and reentry, we developed profiles to represent challenges related to gender, childcare, ageing, digital literacy, domestic violence, and higher education (all under "Profiles"). <strong>We recommend selecting two of these add-ons based on your audience and the needs of your local community.</strong></p>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step9">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">09</div>
+        <div class="step-header-text">
+          <div class="step-when">1 Month Before Your Event</div>
+          <div class="step-title">Recruiting volunteers</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">1 month from your event, identify <strong>25 volunteers</strong> who are willing to come half an hour early to train. Instead of participating as reentrants, they will work behind the tables and simulate offices like social services, employers, and more. They do <strong>not</strong> need to have experience with simulations.</p>
+        <p class="step-text"><a href="https://docs.google.com/spreadsheets/d/1ncc9-KBCM9RIEbsCvFupOQpjpynle2sAAMNb5lKQvXQ/" target="_blank">Use this spreadsheet to track volunteers.</a> The stations with higher numbers have higher difficulty; we recommend doubling up volunteers here.</p>
+        <p class="step-text">You can run the simulation with as few as 12 volunteers if necessary. We've found that 25 gives you room for no-shows, check-in desk volunteers, and doubling up at the more difficult tables.</p>
+        <div class="pro-tip">Lean on your partner organizations to find volunteers rather than simply asking the public.</div>
+        <div class="example-box" style="margin-top:1.5rem;">
+          <div class="example-badge">VOLUNTEER EMAIL TEMPLATE</div>
+          <p>Hello Volunteers,</p>
+          <p>Thank you so much for signing up to be a part of the upcoming Reentry Simulation on <strong>[DATE]</strong>. In an effort to make sure everyone is prepared, we ask volunteers to arrive at <strong>[TIME]</strong>.</p>
+          <hr class="ex-rule">
+          <p><strong>Day of Logistics</strong></p>
+          <p>Each volunteer will manage a station or the registration table reflected on the spreadsheet below. During the training before the event, you will receive your assigned station folder. In the folders, you will find the societal institutions you represent during the simulation or the profiles to assign to participants.</p>
+          <p>On <a href="https://docs.google.com/spreadsheets/d/1ncc9-KBCM9RIEbsCvFupOQpjpynle2sAAMNb5lKQvXQ/" target="_blank">this spreadsheet</a>, please review the instructions and materials corresponding with your name in the folders before you arrive. We're including an old video from one of our training sessions that may help orient you before the training. While the video may not apply to every aspect of the session, it's still helpful to get a sense of how the process will go. Here is the <a href="https://psu.mediaspace.kaltura.com/media/Reentry+Simulation/1_iai8lx1a" target="_blank">Reentry Training Video</a>.</p>
+          <p>If you cannot arrive early for the training, please let us know and we will make accommodations. Please let us know if you have any questions or concerns.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step10">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">10</div>
+        <div class="step-header-text">
+          <div class="step-when">3 Weeks Before Your Event</div>
+          <div class="step-title">Organizing your materials</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text"><strong>Participant Profiles:</strong> In the nametag holders, include:</p>
+        <ul class="step-list">
+          <li>Name</li><li>Money (amount based on profile)</li>
+          <li>Transportation tickets (amount based on profile)</li><li>Pawn items (amount based on profile)</li>
+        </ul>
+        <p class="step-text" style="margin-top:0.75rem;">Then, put these in the clear binder sleeves along with a participant profile and the matching life card.</p>
+        <p class="step-text" style="margin-top:0.75rem;"><strong>Stations:</strong> Each station has its own instructions for what to include. Assign one manila envelope per station, then fill that envelope with the instruction page, a sign for the station (folded cardstock works!), and suggested materials.</p>
+        <div class="pro-tip">Cutting out and organizing materials can be MUCH more time-consuming than you might expect. Rally help and leave yourself time!</div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step11">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">11</div>
+        <div class="step-header-text">
+          <div class="step-when">1–2 Weeks Before Your Event</div>
+          <div class="step-title">Send reminders</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">1–2 weeks from your event, send reminders to participants, volunteers, and partners. Be sure to include:</p>
+        <ul class="step-list">
+          <li>Arrival time expectations (especially for volunteers)</li>
+          <li>A reminder that we encourage formerly-incarcerated participants to join behind the stations rather than as reentrants</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step12">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">12</div>
+        <div class="step-header-text">
+          <div class="step-when">The Morning of Your Event</div>
+          <div class="step-title">Setting up the room</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">The morning of your event, set up the room using the floor plan below. You can combine 2 stations per table depending on the size of your space. Place the station envelopes on the tables. The tables do not have to match the floor plan exactly.</p>
+        <div style="margin-top:1rem;">
+          <a href="https://drive.google.com/file/d/1GmEW8Lrbygei7Nq7RaFiFQy-Mm82C6FU/view" target="_blank" class="btn-action">📐 Floor Plan PDF</a>
+        </div>
+        <div class="pro-tip">For traffic flow, we recommend 1) a check-in table where participants receive profiles and 2) not doubling up the ID table (which gets crowded early on).</div>
+      </div></div>
+    </div>
+
+    <div class="step-block" id="step13">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num">13</div>
+        <div class="step-header-text">
+          <div class="step-when">30 Minutes Before Your Event</div>
+          <div class="step-title">Training the volunteers</div>
+        </div>
+        <div class="step-toggle">+</div>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <p class="step-text">30 minutes before your event, convene the volunteers to learn more about their roles. See Volunteer Training video module.</p>
+        <div style="margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+          <a href="https://psu.mediaspace.kaltura.com/media/Reentry+Simulation/1_iai8lx1a" target="_blank" class="btn-action">🎥 Volunteer Training Video</a>
+          <a href="https://docs.google.com/spreadsheets/d/1ncc9-KBCM9RIEbsCvFupOQpjpynle2sAAMNb5lKQvXQ/" target="_blank" class="btn-action-ghost">📋 Volunteer Tracker Spreadsheet</a>
+        </div>
+      </div></div>
+    </div>
+
+  </main>
+</div>
+
+<div class="downloads-section" id="downloads">
+  <div>
+    <div style="font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--lilac);margin-bottom:0.5rem;">Access Materials</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:white;">Everything you need, free.</div>
+  </div>
+  <div class="downloads-grid">
+    <a href="https://drive.google.com/file/d/1GmEW8Lrbygei7Nq7RaFiFQy-Mm82C6FU/view" class="download-card" target="_blank">
+      <div class="download-card-icon">📐</div>
+      <div class="download-card-title">Floor Plan PDF</div>
+      <div class="download-card-desc">Room setup diagram for your event space.</div>
+    </a>
+    <a href="https://docs.google.com/spreadsheets/d/1ncc9-KBCM9RIEbsCvFupOQpjpynle2sAAMNb5lKQvXQ/" class="download-card" target="_blank">
+      <div class="download-card-icon">📋</div>
+      <div class="download-card-title">Volunteer Tracker</div>
+      <div class="download-card-desc">Spreadsheet to assign and manage all volunteers.</div>
+    </a>
+    <a href="https://psu.mediaspace.kaltura.com/media/Reentry+Simulation/1_iai8lx1a" class="download-card" target="_blank">
+      <div class="download-card-icon">🎥</div>
+      <div class="download-card-title">Training Video</div>
+      <div class="download-card-desc">Full walkthrough of volunteer roles and simulation flow.</div>
+    </a>
+  </div>
+</div>
+
+
+<footer>
+  <a href="index.html" style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:white;text-decoration:none;">Restorative Justice Initiative</a>
+  <div class="footer-right">© 2026 Restorative Justice Initiative · Penn State University</div>
+</footer>
+
+<script>
+  function toggleStep(h){h.closest('.step-block').classList.toggle('open');}
+  function setPhase(btn){document.querySelectorAll('.phase-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');}
+  const total=document.querySelectorAll('.ck-box').length;
+  function ck(el){el.classList.toggle('on');const l=el.nextElementSibling;if(l)l.classList.toggle('done');const c=document.querySelectorAll('.ck-box.on').length;document.getElementById('pFill').style.width=(c/total*100)+'%';document.getElementById('pCount').textContent=c===total?'All done! ✓':`${c} of ${total} checked`;}
+  const steps=document.querySelectorAll('.step-block'),sLinks=document.querySelectorAll('.sidebar-links a');
+  new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)sLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));});},{rootMargin:'-25% 0px -65% 0px'}).observe||(()=>{})();
+  document.querySelectorAll('.step-block').forEach(s=>new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)sLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));});},{rootMargin:'-25% 0px -65% 0px'}).observe(s));
+</script>
+</body>
+</html>
